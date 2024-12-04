@@ -1,0 +1,9 @@
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+prettytable
+pdbpp
+jupyter
+ipykernel
