@@ -58,7 +58,7 @@ def impute_age(X):
     predicted_ages = [(inverse_model(x, a, b) + noise()).round() for x in sibsp_masked]
 
     X.loc[x_mask, 'Age'] = predicted_ages
-    return X, sibsp, age, sibsp_masked, predicted_ages
+    return X, sibsp, age, sibsp_masked, predicted_ages, a, b
 
 
 def average_fares_by_pclass(X):
