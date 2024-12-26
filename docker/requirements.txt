@@ -7,3 +7,4 @@ prettytable
 pdbpp
 jupyter
 ipykernel
+category_encoders

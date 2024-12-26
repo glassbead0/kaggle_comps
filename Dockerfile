@@ -6,7 +6,7 @@ FROM python:3.13-slim
 WORKDIR /kaggle
 
 # Install common utilities
-RUN apt-get update && apt-get install -y procps less vim curl wget net-tools iputils-ping
+RUN apt-get update && apt-get install -y procps less vim curl wget net-tools iputils-ping graphviz
 
 # Install Python packages
 COPY docker/requirements.txt docker/

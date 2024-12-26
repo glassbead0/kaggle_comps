@@ -31,8 +31,6 @@ def show_values_on_bar(bars, ax=plt):
             va='bottom'                         # Vertical alignment
         )
 
-        
-
 def inverse_model(x, a, b):
     return a / (x + b)
 
