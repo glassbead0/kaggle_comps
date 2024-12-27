@@ -1,13 +1,16 @@
 from category_encoders import OrdinalEncoder
 import pandas as pd
 
+def lead_style_order():
+    return['Onsight/Flash', 'Redpoint', 'Fell/Hung']
+
 def ordinal_mapping(df):
     ''' DF must have a 'Date' column'''
-    [
+    return [
         {'col': 'Route Type', 'mapping': {'Sport': 0, 'Trad': 1}},
         {'col': 'Date', 'mapping': {date: i for i, date in enumerate(df['Date'].sort_values().unique())}},
         {'col': 'Safety', 'mapping': {'G': 0, 'PG13': 1, 'R': 2, 'X': 3}},
-        {'col': 'Lead Style', 'mapping': {'Onsight': 0, 'Flash': 1, 'Redpoint': 2, 'Fell/Hung': 3}},
+        {'col': 'Lead Style', 'mapping': {'Onsight/Flash': 0, 'Redpoint': 1, 'Fell/Hung': 2}},
         {'col': 'Rating', 'mapping': {
             'Easy 5th': 0,
             '5.0-': 1, '5.0': 2, '5.0+': 3,
@@ -29,38 +32,29 @@ def ordinal_mapping(df):
         }}
     ]
 
-def ordinal_encode(df):
-    """
-    Apply ordinal encoding to the specified columns of a DataFrame.
-    
+
+def combine_predictions_with_data(df, predictions_df):
+    '''
+    Combine predictions with the original data.
+
     Parameters:
-    df (pd.DataFrame): The DataFrame containing the data.
-    columns (list): The list of columns to encode.
-    
+    df (pd.DataFrame): data that has been grouped and pre-processed, but not ordinalized (for easier reading)
+    predictions_df (pd.DataFrame): predictions from the model
+
     Returns:
-    pd.DataFrame: The DataFrame with encoded columns.
-    """
-    mapping = ordinal_mapping(df)
-    encoder = OrdinalEncoder(mapping)
-    return encoder.fit_transform(df)
+    pd.DataFrame: the original data with the predictions added
+    '''
+
+    # Re-key columns in predictions_df to indicated that they are predictions
+    key_mapping = {'Attempts': 'Predicted Attempts', 'Lead Style': 'Predicted Lead Style'}
+    predictions_df = predictions_df.rename(columns=key_mapping)
     
-
-def combine_predictions_with_data(df, response_cols, predictions):
-    df = pd.DataFrame(predictions, columns=response_cols)
-    df['Attempts'] = y_test['Attempts']
-    df['Lead Style'] = y_test['Lead Style']
-    df = oe.inverse_transform(df)
-
-    # add Route and RouteID back to the df
-    df = df.merge(df_grouped[['Route', 'RouteID']], left_index=True, right_index=True)
-
-    df = df.reset_index(drop=True)
-    y_pred_df = y_pred_df.reset_index(drop=True)
-
-
-    df["Predicted Attempts"] = y_pred_df['Attempts']
+    combined_df = df.copy()
+    combined_df = pd.concat([combined_df, predictions_df], axis=1)
+    
     # map Predicted Lead Style back to string values
-    lead_style_mapping = {i: style for i, style in enumerate(lead_style_order)}
-    df['Predicted Lead Style'] = y_pred_df['Lead Style'].map(lead_style_mapping)
+    lead_style_mapping = {i: style for i, style in enumerate(lead_style_order())}
+    combined_df['Predicted Lead Style'] = combined_df['Predicted Lead Style'].map(lead_style_mapping)
+    
     # reorder columns
-    return df[['Route', 'RouteID', 'Date', 'Route Type', 'Alpine', 'Safety', 'Avg Stars', 'Pitches', 'Rating', 'Predicted Lead Style', 'Lead Style', 'Predicted Attempts', 'Attempts']]
+    return combined_df[['Route', 'RouteID', 'Date', 'Route Type', 'Alpine', 'Safety', 'Avg Stars', 'Pitches', 'Rating', 'Predicted Lead Style', 'Lead Style', 'Predicted Attempts', 'Attempts']]
